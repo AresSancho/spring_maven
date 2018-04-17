@@ -1,0 +1,80 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xsi:schemaLocation="
+	http://www.springframework.org/schema/beans
+	http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+	http://www.springframework.org/schema/context
+	http://www.springframework.org/schema/context/spring-context-4.0.xsd
+	http://www.springframework.org/schema/mvc
+	http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd
+	">
+	<!-- aquí es donde digo la configuración del controlador frontal, y todo 
+		lo que va a tener el contenedor de instancias de spring -->
+
+
+	<!-- en spring mvc lo mas normal del mundo es crear por cada controlador 
+		una bean que tenga el mismo nombre que la clase empezando por minúscula -->
+	<!-- <bean id="controlador" class="controladores.Controlador" /> -->
+	<!-- lo siguiente permite el uso de @Controller , no necesario en spring 
+		4 -->
+	<mvc:annotation-driven />
+	<!-- lo siguiente es para cargar el paquete especificado una bean que empieze 
+		por mayúscula de cada recurso tipo spring : @Controller @Service etc... -->
+	<context:component-scan base-package="controladores" />
+	<context:component-scan base-package="controladoresAdmin" />
+
+	<!-- importar el xml de configuracion de hibernate por spring -->
+	<import resource="hibernate-context.xml" />
+
+
+	<bean id="servicioAnuncios" class="modelo.ServicioAnunciosHibernateImpl" />
+
+	<!-- cambio de idioma: -->
+	<!-- esto mantiene el idioma seleccionado en sesion -->
+	<bean id="localeResolver"
+		class="org.springframework.web.servlet.i18n.SessionLocaleResolver" />
+	<!-- otra opción sería del mismo paquete la clase: CookieLocaleResolver -->
+	<!-- esto dice de donde sacar los textos de los idiomas -->
+	<bean id="messageSource"
+		class="org.springframework.context.support.ReloadableResourceBundleMessageSource">
+		<property name="basename" value="/WEB-INF/messages" />
+	</bean>
+	<mvc:interceptors>
+		<bean class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor">
+			<property name="paramName" value="lang" />
+		</bean>
+		<mvc:interceptor>
+			<mvc:mapping path="/administrar*" />
+			<bean class="interceptores.InterceptorIdentificacion" />
+		</mvc:interceptor>
+	</mvc:interceptors>
+
+
+	<!-- EJEMPLO DE ASOCIACIONES ENTRE BEAN: -->
+
+	<bean id="beanEjemplo" class="otrasBean.BeanEjemplo">
+		<property name="propiedad" value="valor asignado desde xml" />
+	</bean>
+
+	<bean id="beanTercera" class="otrasBean.BeanTercera" />
+
+	<!-- en spring por cada <bean> estoy creando un recurso en el contenedor 
+		de spring, si luego quiero usarlo desde cualquier punto de la aplicación 
+		lo pediré a spring por su id. Si no doy id a algo es que solo quiero que 
+		esté para que dicho elemento haga algo por si solo -->
+
+	<bean
+		class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="prefix">
+			<value>/WEB-INF/jsp/</value>
+		</property>
+		<property name="suffix">
+			<value>.jsp</value>
+		</property>
+	</bean>
+
+
+
+</beans>
